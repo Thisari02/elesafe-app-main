@@ -1,0 +1,74 @@
+# This file configures the analyzer, which statically analyzes Dart code to
+# check for errors, warnings, and lints.
+#
+# The issues identified by the analyzer are surfaced in the UI of Dart-enabled
+# IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
+# invoked from the command line by running `flutter analyze`.
+
+# The following line activates a set of recommended lints for Flutter apps,
+# packages, and plugins designed to encourage good coding practices.
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**  # Ignore generated build files
+    - .dart_tool/**  # Ignore Dart tool cache files
+    - lib/generated_plugin_registrant.dart  # Ignore auto-generated plugin registration file
+
+  errors:
+    missing_required_param: error  # Prevents missing required parameters in function calls
+    missing_return: error  # Ensures all functions with return types return a value
+    dead_code: warning  # Highlights unused code to keep the project clean
+    todo: ignore  # Allows T0D0 comments without showing warnings
+
+formatter:
+  trailing_commas: preserve # Preserves existing trailing commas in code formatting
+
+linter:
+  # The lint rules applied to this project can be customized in the
+  # section below to disable rules from the `package:flutter_lints/flutter.yaml`
+  # included above or to enable additional rules. A list of all available lints
+  # and their documentation is published at https://dart.dev/lints.
+  #
+  # Instead of disabling a lint rule for the entire project in the
+  # section below, it can also be suppressed for a single line of code
+  # or a specific dart file by using the `// ignore: name_of_lint` and
+  # `// ignore_for_file: name_of_lint` syntax on the line or in the file
+  # producing the lint.
+  rules:
+    # ✅ Performance & Optimization
+    avoid_slow_async_io: true  # Prevents using slow async operations (like File IO) in performance-critical parts
+    cancel_subscriptions: true  # Ensures streams are closed properly to avoid memory leaks
+    close_sinks: true  # Avoids potential memory leaks by ensuring sinks are properly closed
+    use_rethrow_when_possible: true  # Ensures proper exception rethrowing for debugging accuracy
+    prefer_final_in_for_each: true  # Prevents modifying loop variables unexpectedly
+    unnecessary_await_in_return: true  # Avoids unnecessary `await` in return statements, improving performance
+
+    # ✅ Best Practices
+    always_use_package_imports: true  # Enforces using `package:` imports instead of relative imports for consistency
+    avoid_classes_with_only_static_members: true  # Encourages using top-level functions instead of unnecessary classes
+    avoid_print: true  # Replaces print statements with proper logging (use `debugPrint` or `logger` package)
+    avoid_relative_lib_imports: true  # Prevents messy imports; use `package:` instead
+    prefer_const_constructors: true  # Encourages using `const` constructors where possible for efficiency
+    prefer_const_declarations: true  # Encourages `const` for immutable variables to improve performance
+    prefer_const_literals_to_create_immutables: true  # Optimizes UI elements by making lists/maps immutable
+    prefer_final_fields: true  # Ensures class fields are final unless necessary, improving immutability
+    use_super_parameters: true  # Uses `super.param` for cleaner constructors (Flutter 3+)
+    use_key_in_widget_constructors: true  # Encourages adding `Key` to widgets for better performance in widget trees
+
+    # ✅ Code Readability & Style
+    prefer_single_quotes: true  # Enforces single quotes for consistency (`'text'` instead of `"text"`)
+    always_put_required_named_parameters_first: false  # Improves function readability by placing required params first
+    sort_child_properties_last: true  # Keeps widget child properties last for better readability
+    prefer_expression_function_bodies: false  # Shortens one-liner functions using `=>`
+    omit_local_variable_types: false  # Allows using `var` where the type is obvious, making code cleaner
+    unnecessary_lambdas: false  # Removes redundant lambda functions to improve readability
+
+    # ✅ Flutter-Specific Improvements
+    avoid_unnecessary_containers: true  # Prevents wrapping widgets in unnecessary `Container`s
+    always_declare_return_types: true  # Enforces specifying return types in functions for clarity
+    use_setters_to_change_properties: true  # Encourages using setters instead of exposing fields directly
+    prefer_typing_uninitialized_variables: true  # Encourages specifying types for uninitialized variables for clarity
+
+# Additional information about this file can be found at
+# https://dart.dev/guides/language/analysis-options

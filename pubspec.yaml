@@ -1,0 +1,65 @@
+name: elesafe_app
+description: "Elesafe App - Safety for elephants and humans"
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+  flutter: 3.32.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  google_maps_flutter: ^2.13.1
+  go_router: ^16.2.4
+  flutter_native_splash: ^2.4.4
+  pointer_interceptor: ^0.10.1+2
+  logging: ^1.3.0
+  responsive_builder: ^0.7.1
+  flutter_easyloading: ^3.0.5
+  firebase_core: ^3.15.2
+  cloud_firestore: ^5.6.12
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+  change_app_package_name: ^1.4.0
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_icon.png"
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/icons/app_icon.png"
+  adaptive_icon_monochrome: "assets/icons/app_icon.png"
+  remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: "assets/icons/app_icon.png"
+    background_color: "#ffffff"
+    theme_color: "#ffffff"
+
+flutter_native_splash:
+  image: "assets/icons/splash_icon.png"
+  color: "#ffffff"
+  color_web: "#ffffff"
+  image_web: "assets/icons/splash_icon.png"
+
+  android_12:
+    image: "assets/icons/splash_icon.png"
+    color: "#ffffff"
+    icon_background_color: "#ffffff"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/icons/
+    - assets/images/
