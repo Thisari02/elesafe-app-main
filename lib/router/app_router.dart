@@ -2,19 +2,25 @@
 import 'package:elesafe_app/features/alert/alert_screen.dart';
 import 'package:elesafe_app/features/alert/models/alert_data_model.dart';
 import 'package:elesafe_app/features/map/map_screen.dart';
+import 'package:elesafe_app/features/signin/signin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 
 class AppRouter {
+  static const loginPath = '/signin';
   static const alertPath = '/alerts';
   static const mapPath = '/map';
 
   // MUST exist
   static GoRouter createRouter() {
     return GoRouter(
-      initialLocation: alertPath,
+      initialLocation: loginPath,
       routes: [
+        GoRoute(
+          path: loginPath,
+          builder: (context, state) => const SignInScreen(),
+        ),
         GoRoute(
           path: alertPath,
           builder: (context, state) => const AlertScreen(),

@@ -39,13 +39,25 @@ class AlertDataModel {
         (locationData['lng'] as num).toDouble(),
       );
     } else {
-      location = LatLng(0, 0); // fallback
+      location = const LatLng(0, 0);
+    }
+
+    final ts = json['timestamp'];
+
+    // 🔥 FIX: convert Firestore Timestamp → String
+    String timestampString;
+    if (ts is Timestamp) {
+      timestampString = ts.toDate().toIso8601String();
+    } else if (ts is String) {
+      timestampString = ts;
+    } else {
+      timestampString = '';
     }
 
     return AlertDataModel(
       id: id,
       title: json['title'] ?? '',
-      timestamp: json['timestamp'] ?? '',
+      timestamp: timestampString,
       description: json['description'] ?? '',
       location: location,
     );
