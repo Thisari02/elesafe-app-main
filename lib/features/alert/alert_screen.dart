@@ -78,7 +78,7 @@ class _AlertScreenState extends State<AlertScreen> {
                   itemBuilder: (context, index) {
                     final alert = alerts[index];
 
-                    final bool isElephantAlert = alert.title == 'Sensor Triggered PL' || alert.title == 'Sensor Triggered PLD';
+                    final bool isElephantAlert = alert.title == 'Sensor Triggered LP' || alert.title == 'Sensor Triggered LPD' || alert.title == 'Sensor Triggered LD';
                     final Color backgroundColor = isElephantAlert ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1);
                     final RichText titleWidget = isElephantAlert
                         ? RichText(

@@ -2,8 +2,7 @@
 import 'package:elesafe_app/features/alert/alert_screen.dart';
 import 'package:elesafe_app/features/alert/models/alert_data_model.dart';
 import 'package:elesafe_app/features/forgot_password/forgot_password_screen.dart';
-// import 'package:elesafe_app/features/map/map_screen.dart';
-import 'package:elesafe_app/features/map/mock_map_screen.dart';
+import 'package:elesafe_app/features/map/map_screen.dart';
 import 'package:elesafe_app/features/signin/signin_screen.dart';
 import 'package:elesafe_app/features/signup/signup_screen.dart';
 import 'package:flutter/material.dart';
@@ -43,14 +42,13 @@ class AppRouter {
         GoRoute(
           path: mapPath,
           builder: (context, state) {
-            // final alertData = state.extra as AlertDataModel?;
-            // if (alertData == null) {
-            //   return const Scaffold(
-            //     body: Center(child: Text('No alert data provided')),
-            //   );
-            // }
-            // return MapScreen(alertData: alertData);
-            return const MockMapScreen();
+            final alertData = state.extra as AlertDataModel?;
+            if (alertData == null) {
+              return const Scaffold(
+                body: Center(child: Text('No alert data provided')),
+              );
+            }
+            return MapScreen(alertData: alertData);
           },
         ),
       ],
