@@ -77,22 +77,49 @@ class _AlertScreenState extends State<AlertScreen> {
                   itemCount: alerts.length,
                   itemBuilder: (context, index) {
                     final alert = alerts[index];
+
+                    final bool isElephantAlert = alert.title == 'Sensor Triggered PL' || alert.title == 'Sensor Triggered PLD';
+                    final Color backgroundColor = isElephantAlert ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1);
+                    final RichText titleWidget = isElephantAlert
+                        ? RichText(
+                            text: const TextSpan(
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.black,
+                                height: 1.3,
+                              ),
+                              children: [
+                                TextSpan(text: 'Sensor Triggered : '),
+                                TextSpan(
+                                  text: 'Elephant',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          )
+                        : RichText(
+                            text: const TextSpan(
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.black,
+                                height: 1.3,
+                              ),
+                              children: [
+                                TextSpan(text: 'Sensor Triggered Clear'),
+                              ],
+                            ),
+                          );
+
                     return GestureDetector(
                       onTap: () => context.push(AppRouter.mapPath, extra: alert),
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 14),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: backgroundColor,
                           borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.1),
-                              spreadRadius: 1,
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
                           border: Border.all(
                             color: Colors.grey.withOpacity(0.2),
                             width: 1,
@@ -103,8 +130,8 @@ class _AlertScreenState extends State<AlertScreen> {
                             Container(
                               width: 40,
                               height: 40,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFff4444),
+                              decoration: BoxDecoration(
+                                color: isElephantAlert ? const Color(0xFFff4444) : Colors.green,
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(Icons.error_outline, color: Colors.white, size: 24),
@@ -114,15 +141,7 @@ class _AlertScreenState extends State<AlertScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    alert.title,
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black,
-                                      height: 1.3,
-                                    ),
-                                  ),
+                                  titleWidget,
                                   const SizedBox(height: 6),
                                   Text(
                                     alert.timestamp,
