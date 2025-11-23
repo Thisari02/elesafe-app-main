@@ -4,59 +4,73 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:go_router/go_router.dart';
 
-class SignInScreen extends StatefulWidget {
-  const SignInScreen({super.key});
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
 
   @override
-  State<SignInScreen> createState() => _SignInScreenState();
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _SignInScreenState extends State<SignInScreen> {
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
 
   @override
   void dispose() {
     _emailController.dispose();
-    _passwordController.dispose();
+    _currentPasswordController.dispose();
+    _newPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _signIn() async {
+  Future<void> _resetPassword() async {
     if (!mounted) return;
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
+    final email = _emailController.text.trim();
+    final currentPassword = _currentPasswordController.text.trim();
+    final newPassword = _newPasswordController.text.trim();
+
+    if (email.isEmpty || currentPassword.isEmpty || newPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter email and password')),
+        const SnackBar(content: Text('Please fill all fields')),
       );
       return;
     }
 
     FocusManager.instance.primaryFocus?.unfocus();
-    EasyLoading.show(status: 'Logging in...');
+    EasyLoading.show(status: 'Resetting password...');
 
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('user_credential')
           .where('Email', isEqualTo: email)
-          .where('Password', isEqualTo: password)
+          .where('Password', isEqualTo: currentPassword)
           .limit(1)
           .get();
 
-      EasyLoading.dismiss();
-
-      if (querySnapshot.docs.isNotEmpty) {
-        if (mounted) {
-          context.go('${AppRouter.alertPath}/$email');
-        }
-      } else {
+      if (querySnapshot.docs.isEmpty) {
+        EasyLoading.dismiss();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Invalid email or password')),
+            const SnackBar(content: Text('Invalid email or current password')),
           );
         }
+        return;
+      }
+
+      final docId = querySnapshot.docs.first.id;
+      await FirebaseFirestore.instance.collection('user_credential').doc(docId).update({
+        'Password': newPassword,
+      });
+
+      EasyLoading.dismiss();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Password reset successful! Please sign in.')),
+        );
+        context.go(AppRouter.loginPath);
       }
     } catch (e) {
       EasyLoading.dismiss();
@@ -85,22 +99,11 @@ class _SignInScreenState extends State<SignInScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Elephant Logo
-                    Image.asset('assets/images/elephant_logo.png', height: 130),
-                    const SizedBox(height: 15),
-
-                    // Title
                     const Text(
-                      'ELEPHANT',
-                      style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 3),
-                    ),
-                    const Text(
-                      'ALERT SYSTEM',
+                      'Change Password',
                       style: TextStyle(fontSize: 26, fontWeight: FontWeight.w400, color: Colors.white, letterSpacing: 2),
                     ),
                     const SizedBox(height: 50),
-
-                    // Email Field
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(18),
@@ -120,19 +123,36 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Password Field
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(18),
                         color: Colors.white.withOpacity(0.1),
                       ),
                       child: TextField(
-                        controller: _passwordController,
+                        controller: _currentPasswordController,
                         obscureText: true,
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
-                          hintText: 'Password',
+                          hintText: 'Current Password',
+                          hintStyle: TextStyle(color: Colors.white.withOpacity(0.8)),
+                          prefixIcon: Icon(Icons.lock_outline, color: Colors.white.withOpacity(0.8)),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(18),
+                        color: Colors.white.withOpacity(0.1),
+                      ),
+                      child: TextField(
+                        controller: _newPasswordController,
+                        obscureText: true,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: 'New Password',
                           hintStyle: TextStyle(color: Colors.white.withOpacity(0.8)),
                           prefixIcon: Icon(Icons.lock_outline, color: Colors.white.withOpacity(0.8)),
                           border: InputBorder.none,
@@ -141,43 +161,34 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                     ),
                     const SizedBox(height: 30),
-
-                    // Login Button
                     SizedBox(
                       width: double.infinity,
                       height: 55,
                       child: ElevatedButton(
-                        onPressed: _signIn,
+                        onPressed: _resetPassword,
                         style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                           backgroundColor: const Color(0xFF386cc0),
                           elevation: 0,
                         ),
                         child: const Text(
-                          'Login',
+                          'Change Password',
                           style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500, color: Colors.white),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10),
-
-                    // Forgot Password
-                    TextButton(
-                      onPressed: () => context.go(AppRouter.forgotPasswordPath),
-                      child: Text('Forgot password?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400, color: Colors.white.withOpacity(0.8))),
-                    ),
-                     const SizedBox(height: 10),
+                    const SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "Don't have an account?",
+                          "Remembered your password?",
                           style: TextStyle(color: Colors.white.withOpacity(0.8)),
                         ),
                         TextButton(
-                          onPressed: () => context.go(AppRouter.signupPath),
+                          onPressed: () => context.go(AppRouter.loginPath),
                           child: const Text(
-                            'Sign Up',
+                            'Sign In',
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
