@@ -13,6 +13,26 @@ class AlertScreen extends StatefulWidget {
 }
 
 class _AlertScreenState extends State<AlertScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  bool _sortAscending = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   void _logout() {
     context.go(AppRouter.loginPath);
   }
@@ -56,6 +76,42 @@ class _AlertScreenState extends State<AlertScreen> {
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search by status, description, date...',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    _sortAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                  ),
+                  tooltip: 'Sort by date',
+                  onPressed: () {
+                    setState(() {
+                      _sortAscending = !_sortAscending;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: alertsCollection.orderBy('timestamp', descending: true).snapshots(),
@@ -68,9 +124,32 @@ class _AlertScreenState extends State<AlertScreen> {
                   return const Center(child: Text('No alerts found.'));
                 }
 
-                final alerts = snapshot.data!.docs
+                var alerts = snapshot.data!.docs
                     .map((doc) => AlertDataModel.fromFirestore(doc.id, doc.data() as Map<String, dynamic>))
                     .toList();
+
+                if (_searchQuery.isNotEmpty) {
+                  alerts = alerts.where((alert) {
+                    final query = _searchQuery.toLowerCase();
+                    final descriptionMatch = alert.description.toLowerCase().contains(query);
+                    final dateMatch = alert.timestamp.toLowerCase().contains(query);
+
+                    final elephantAlertSuffixes = {
+                      'PLD', 'LPD', 'DPL', 'PDL', 'LDP', 'LP', 'PL', 'DL', 'LD'
+                    };
+                    final bool isElephantAlert = elephantAlertSuffixes.any((suffix) => alert.title.endsWith(suffix));
+                    final status = isElephantAlert ? 'elephant' : 'clear';
+                    final statusMatch = status.toLowerCase().contains(query);
+
+                    return descriptionMatch || dateMatch || statusMatch;
+                  }).toList();
+                }
+
+                alerts.sort((a, b) {
+                  return _sortAscending
+                      ? a.timestamp.compareTo(b.timestamp)
+                      : b.timestamp.compareTo(a.timestamp);
+                });
 
                 return ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -78,7 +157,12 @@ class _AlertScreenState extends State<AlertScreen> {
                   itemBuilder: (context, index) {
                     final alert = alerts[index];
 
-                    final bool isElephantAlert = alert.title == 'Sensor Triggered LP' || alert.title == 'Sensor Triggered LPD' || alert.title == 'Sensor Triggered LD';
+                    final elephantAlertSuffixes = {
+                      'PLD', 'LPD', 'DPL', 'PDL', 'LDP', 'LP', 'PL', 'DL', 'LD'
+                    };
+
+                    final bool isElephantAlert = elephantAlertSuffixes.any((suffix) => alert.title.endsWith(suffix));
+
                     final Color backgroundColor = isElephantAlert ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1);
                     final RichText titleWidget = isElephantAlert
                         ? RichText(
