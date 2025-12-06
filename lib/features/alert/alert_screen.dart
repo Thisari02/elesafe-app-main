@@ -84,8 +84,16 @@ class _AlertScreenState extends State<AlertScreen> {
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: 'Search by status, description, date...',
+                      hintText: 'Search all alerts by date, status...',
                       prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                              },
+                            )
+                          : null,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
@@ -128,7 +136,22 @@ class _AlertScreenState extends State<AlertScreen> {
                     .map((doc) => AlertDataModel.fromFirestore(doc.id, doc.data() as Map<String, dynamic>))
                     .toList();
 
-                if (_searchQuery.isNotEmpty) {
+                // Apply filters
+                if (_searchQuery.isEmpty) {
+                  // By default, only show today's alerts
+                  final now = DateTime.now();
+                  final today = DateTime(now.year, now.month, now.day);
+                  alerts = alerts.where((alert) {
+                    try {
+                      final alertDate = DateTime.parse(alert.timestamp);
+                      final alertDay = DateTime(alertDate.year, alertDate.month, alertDate.day);
+                      return alertDay.isAtSameMomentAs(today);
+                    } catch (e) {
+                      return false;
+                    }
+                  }).toList();
+                } else {
+                  // If searching, filter all alerts based on the query
                   alerts = alerts.where((alert) {
                     final query = _searchQuery.toLowerCase();
                     final descriptionMatch = alert.description.toLowerCase().contains(query);
@@ -145,11 +168,22 @@ class _AlertScreenState extends State<AlertScreen> {
                   }).toList();
                 }
 
+                // Apply sorting
                 alerts.sort((a, b) {
                   return _sortAscending
                       ? a.timestamp.compareTo(b.timestamp)
                       : b.timestamp.compareTo(a.timestamp);
                 });
+
+                if (alerts.isEmpty) {
+                  return Center(
+                    child: Text(
+                      _searchQuery.isEmpty
+                          ? 'No alerts for today.'
+                          : 'No results found for "$_searchQuery"',
+                    ),
+                  );
+                }
 
                 return ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
